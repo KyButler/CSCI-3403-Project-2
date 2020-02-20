@@ -30,7 +30,7 @@ def pad_message(message):
 # TODO: Generate a cryptographically random AES key
 def generate_key():
     # TODO: Implement this function
-    pass
+    return os.urandom(16) # 128 bit key = 16 bytes
 
 
 # Takes an AES session key and encrypts it using the appropriate
@@ -94,6 +94,7 @@ def main():
             exit(0)
 
         # TODO: Encrypt message and send to server
+        send_message(sock, encrypt_message(message, encrypted_key)) # check second argument's validity
 
         # TODO: Receive and decrypt response from server
     finally:

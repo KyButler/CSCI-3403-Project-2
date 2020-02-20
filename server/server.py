@@ -13,7 +13,7 @@
 
 """
 
-import socket
+import socket, hashlib, binascii, os
 
 host = "localhost"
 port = 10001
@@ -67,7 +67,8 @@ def verify_hash(user, password):
             line = line.split("\t")
             if line[0] == user:
                 # TODO: Generate the hashed password
-                # hashed_password =
+                # uses same method as in add_user
+                hashed_password = binascii.hexlify(hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii'), 100000))
                 return hashed_password == line[2]
         reader.close()
     except FileNotFoundError:
@@ -105,8 +106,10 @@ def main():
                 ciphertext_message = receive_message(connection)
 
                 # TODO: Decrypt message from client
+                decryptedMessage = decrypt_message(ciphertext_message, plaintext_key)
 
                 # TODO: Split response from user into the username and password
+
 
                 # TODO: Encrypt response to client
 
