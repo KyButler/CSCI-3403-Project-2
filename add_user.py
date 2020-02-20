@@ -5,13 +5,14 @@
     Authors: Matt Niemiec and Abigail Fernandes
     The solution contains the same number of lines (plus imports)
 """
+import hashlib, binascii, os
 
 user = input("Enter a username: ")
 password = input("Enter a password: ")
 
 # TODO: Create a salt and hash the password
-# salt = ???
-# hashed_password = ???
+salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
+hashed_password = binascii.hexlify(hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), salt, 100000))
 
 try:
     reading = open("passfile.txt", 'r')
