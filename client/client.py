@@ -8,7 +8,7 @@
         is provided as a sanity check)
 
     Put your team members' names:
-
+    Kyran Butler
 
 
 """
@@ -37,6 +37,10 @@ def generate_key():
 # key and return the value
 def encrypt_handshake(session_key):
     # TODO: Implement this function
+    f = open("RSA_keys.pub", "r")
+    key = f.read().split(" ", 3)[1] # gets just the key part
+    print(key)
+    f.close()
     pass
 
 
@@ -55,7 +59,7 @@ def decrypt_message(message, session_key):
 # Sends a message over TCP
 def send_message(sock, message):
     sock.sendall(message)
-
+    pass
 
 # Receive a message from TCP
 def receive_message(sock):

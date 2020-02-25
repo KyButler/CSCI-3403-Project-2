@@ -8,7 +8,7 @@
         is provided as a sanity check)
 
     Put your team members' names:
-
+    Kyran Butler
 
 
 """
@@ -27,6 +27,10 @@ def pad_message(message):
 # Write a function that decrypts a message using the server's private key
 def decrypt_key(session_key):
     # TODO: Implement this function
+    f = open("RSA_keys", "r")
+    key = f.read().split("-", 13)[10] # gets just the key part
+    print(key)
+    f.close()
     pass
 
 
