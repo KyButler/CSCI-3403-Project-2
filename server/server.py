@@ -9,11 +9,14 @@
 
     Put your team members' names:
     Kyran Butler
+    John Salame
 
 
 """
 
 import socket, hashlib, binascii, os
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.PublicKey import RSA
 
 host = "localhost"
 port = 10001
@@ -29,9 +32,15 @@ def decrypt_key(session_key):
     # TODO: Implement this function
     f = open("RSA_keys", "r")
     key = f.read().split("-", 13)[10] # gets just the key part
-    print(key)
+    #print(key)
     f.close()
-    pass
+    #John's additions
+    priv_key = RSA.importKey(open('RSA_keys').read())
+    cipher = PKCS1_OAEP.new(priv_key)
+    decrypted_key = cipher.decrypt(session_key)
+    print("AES KEY:")
+    print(decrypted_key)
+    return decrypted_key
 
 
 # Write a function that decrypts a message using the session key

@@ -9,12 +9,15 @@
 
     Put your team members' names:
     Kyran Butler
+    John Salame
 
 
 """
 
 import socket
 import os
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.PublicKey import RSA
 
 
 host = "localhost"
@@ -30,7 +33,10 @@ def pad_message(message):
 # TODO: Generate a cryptographically random AES key
 def generate_key():
     # TODO: Implement this function
-    return os.urandom(16) # 128 bit key = 16 bytes
+    key = os.urandom(16)
+    print("AES KEY:")
+    print(key)
+    return key # 128 bit key = 16 bytes
 
 
 # Takes an AES session key and encrypts it using the appropriate
@@ -38,10 +44,14 @@ def generate_key():
 def encrypt_handshake(session_key):
     # TODO: Implement this function
     f = open("RSA_keys.pub", "r")
-    key = f.read().split(" ", 3)[1] # gets just the key part
-    print(key)
+    printable_key = f.read().split(" ", 3)[1] # gets just the key part
+    #print(printable_key)
     f.close()
-    pass
+    key = RSA.importKey(open("RSA_keys.pub").read())
+    cipher = PKCS1_OAEP.new(key)
+    encrypted_key = cipher.encrypt(session_key)
+    #print(encrypted_key)
+    return encrypted_key
 
 
 # Encrypts the message using AES. Same as server function
