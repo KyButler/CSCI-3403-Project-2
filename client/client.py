@@ -10,15 +10,14 @@
     Put your team members' names:
     Kyran Butler
     John Salame
-
-
+    In Ji Chung
 """
 
 import socket
 import os
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
-
 
 host = "localhost"
 port = 10001
@@ -36,13 +35,13 @@ def generate_key():
     key = os.urandom(16)
     print("AES KEY:")
     print(key)
+    print("LENGTH ", len(key))
     return key # 128 bit key = 16 bytes
 
 
 # Takes an AES session key and encrypts it using the appropriate
 # key and return the value
 def encrypt_handshake(session_key):
-    # TODO: Implement this function
     f = open("RSA_keys.pub", "r")
     printable_key = f.read().split(" ", 3)[1] # gets just the key part
     #print(printable_key)
@@ -54,10 +53,17 @@ def encrypt_handshake(session_key):
     return encrypted_key
 
 
-# Encrypts the message using AES. Same as server function
 def encrypt_message(message, session_key):
-    # TODO: Implement this function
-    pass
+    iv = os.urandom(16) # 128 bit IV init
+    print("iv", iv)
+    print("key", session_key)
+    aes = AES.new(session_key, AES.MODE_CBC, iv) #Init AES
+    ciphertext = aes.encrypt(pad_message(message)) # Encrypt message
+    print("ciphertext", ciphertext)
+    dec = AES.new(session_key, AES.MODE_CBC, iv)
+    cipher = dec.decrypt(ciphertext)
+    print("cipher", cipher)
+    return ciphertext
 
 
 # Decrypts the message using AES. Same as server function
@@ -108,7 +114,7 @@ def main():
             exit(0)
 
         # TODO: Encrypt message and send to server
-        send_message(sock, encrypt_message(message, encrypted_key)) # check second argument's validity
+        send_message(sock, encrypt_message(message, key)) # check second argument's validity
 
         # TODO: Receive and decrypt response from server
     finally:
