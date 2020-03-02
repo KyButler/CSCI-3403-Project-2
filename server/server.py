@@ -13,9 +13,10 @@
 	In Ji Chung
 """
 
-import socket, hashlib, binascii, os
+import socket, hashlib, binascii, os, time
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES
 
 host = "localhost"
 port = 10001
@@ -43,15 +44,18 @@ def decrypt_key(session_key):
 
 
 # Write a function that decrypts a message using the session key
-def decrypt_message(client_message, session_key):
-    # TODO: Implement this function
-    pass
+def decrypt_message(client_message, session_key, iv):
+    aes = AES.new(session_key, AES.MODE_CBC, iv) #Init AES
+    cipher = aes.decrypt(client_message)
+    print(cipher)
+    return cipher
 
 
 # Encrypt a message using the session key
-def encrypt_message(message, session_key):
-    # TODO: Implement this function
-    pass
+def encrypt_message(message, session_key, iv):
+    aes = AES.new(session_key, AES.MODE_CBC, iv) #Init AES
+    ciphertext = aes.encrypt(pad_message(message)) # Encrypt message
+    return ciphertext
 
 
 # Receive 1024 bytes from the client
@@ -116,17 +120,26 @@ def main():
 
                 # Receive encrypted message from client
                 ciphertext_message = receive_message(connection)
+                print("ciphertext!", ciphertext_message)
+                iv = receive_message(connection)
+                print("iv", iv)
 
                 # TODO: Decrypt message from client
-                decryptedMessage = decrypt_message(ciphertext_message, plaintext_key)
+                decryptedMessage = decrypt_message(ciphertext_message, plaintext_key, iv)
+                print (decrypt_message)
 
                 # TODO: Split response from user into the username and password
 
 
                 # TODO: Encrypt response to client
+                response_iv = os.urandom(16) # 128 bit IV init
+                print(response_iv)
+                ciphertext_response = encrypt_message("I received your message cutie!", plaintext_key, response_iv)
 
                 # Send encrypted response
                 send_message(connection, ciphertext_response)
+                time.sleep(0.1) #wait 0.1 seconds
+                send_message(connection, response_iv)
             finally:
                 # Clean up the connection
                 connection.close()

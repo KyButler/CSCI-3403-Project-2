@@ -15,6 +15,7 @@
 
 import socket
 import os
+import time
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
@@ -53,29 +54,23 @@ def encrypt_handshake(session_key):
     return encrypted_key
 
 
-def encrypt_message(message, session_key):
-    iv = os.urandom(16) # 128 bit IV init
-    print("iv", iv)
-    print("key", session_key)
+def encrypt_message(message, session_key, iv):
     aes = AES.new(session_key, AES.MODE_CBC, iv) #Init AES
     ciphertext = aes.encrypt(pad_message(message)) # Encrypt message
-    print("ciphertext", ciphertext)
-    dec = AES.new(session_key, AES.MODE_CBC, iv)
-    cipher = dec.decrypt(ciphertext)
-    print("cipher", cipher)
     return ciphertext
 
 
 # Decrypts the message using AES. Same as server function
-def decrypt_message(message, session_key):
-    # TODO: Implement this function
-    pass
+def decrypt_message(message, session_key, iv):
+    aes = AES.new(session_key, AES.MODE_CBC, iv) #Init AES
+    cipher = aes.decrypt(message)
+    print(cipher)
+    return cipher
 
 
 # Sends a message over TCP
 def send_message(sock, message):
     sock.sendall(message)
-    pass
 
 # Receive a message from TCP
 def receive_message(sock):
@@ -114,9 +109,17 @@ def main():
             exit(0)
 
         # TODO: Encrypt message and send to server
-        send_message(sock, encrypt_message(message, key)) # check second argument's validity
+        iv = os.urandom(16) # 128 bit IV init
+        send_message(sock, encrypt_message(message, key, iv)) # check second argument's validity
+        time.sleep(.01) #Pause
+        send_message(sock, iv) # send IV
 
         # TODO: Receive and decrypt response from server
+        response = receive_message(sock)
+        print(response)
+        reply_iv = receive_message(sock)
+        print(reply_iv)
+        decipher = decrypt_message(response, key, reply_iv)
     finally:
         print('closing socket')
         sock.close()
