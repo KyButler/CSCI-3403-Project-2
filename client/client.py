@@ -47,6 +47,7 @@ def encrypt_handshake(session_key):
     printable_key = f.read().split(" ", 3)[1] # gets just the key part
     #print(printable_key)
     f.close()
+    #John's Section of encrypt_handshake:
     key = RSA.importKey(open("RSA_keys.pub").read())
     cipher = PKCS1_OAEP.new(key)
     encrypted_key = cipher.encrypt(session_key)
@@ -64,7 +65,7 @@ def encrypt_message(message, session_key, iv):
 def decrypt_message(message, session_key, iv):
     aes = AES.new(session_key, AES.MODE_CBC, iv) #Init AES
     cipher = aes.decrypt(message)
-    print(cipher)
+    #print(cipher)
     return cipher
 
 
@@ -118,8 +119,9 @@ def main():
         response = receive_message(sock)
         print(response)
         reply_iv = receive_message(sock)
-        print(reply_iv)
+        #print(reply_iv)
         decipher = decrypt_message(response, key, reply_iv)
+        print(decipher.decode("ASCII"))
     finally:
         print('closing socket')
         sock.close()

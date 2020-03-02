@@ -17,6 +17,7 @@ import socket, hashlib, binascii, os, time
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import AES
+import base64
 
 host = "localhost"
 port = 10001
@@ -30,16 +31,18 @@ def pad_message(message):
 # Write a function that decrypts a message using the server's private key
 def decrypt_key(session_key):
     # TODO: Implement this function
+
+    #This key was not necessary, just for testing
     f = open("RSA_keys", "r")
     key = f.read().split("-", 13)[10] # gets just the key part
     #print(key)
     f.close()
+
     #John's additions
     priv_key = RSA.importKey(open('RSA_keys').read())
     cipher = PKCS1_OAEP.new(priv_key)
     decrypted_key = cipher.decrypt(session_key)
-    print("AES KEY:")
-    print(decrypted_key)
+    print("AES KEY: ", decrypted_key)
     return decrypted_key
 
 
@@ -47,7 +50,7 @@ def decrypt_key(session_key):
 def decrypt_message(client_message, session_key, iv):
     aes = AES.new(session_key, AES.MODE_CBC, iv) #Init AES
     cipher = aes.decrypt(client_message)
-    print(cipher)
+    #print(cipher)
     return cipher
 
 
@@ -84,8 +87,17 @@ def verify_hash(user, password):
             if line[0] == user:
                 # TODO: Generate the hashed password
                 # uses same method as in add_user
-                hashed_password = binascii.hexlify(hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii'), 100000))
-                return hashed_password == line[2]
+                #print("Salt: ", line[1])
+                salt = line[1] #this is a string
+                salt = salt[2:-1] #get rid of b''
+                #print("Salt without b'': ", salt)
+                salt = salt.encode('ascii') #turn string into bytes
+                #print(salt)
+                #hashed_password adapted from add_user.py
+                hashed_password = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), salt, 100000)
+                #print(hashed_password)
+                #print(binascii.unhexlify(line[2][2:-1])) #turn string into binary data
+                return hashed_password == binascii.unhexlify(line[2][2:-1])
         reader.close()
     except FileNotFoundError:
         return False
@@ -120,21 +132,34 @@ def main():
 
                 # Receive encrypted message from client
                 ciphertext_message = receive_message(connection)
-                print("ciphertext!", ciphertext_message)
+                #print("ciphertext!", ciphertext_message)
                 iv = receive_message(connection)
-                print("iv", iv)
+                #print("iv", iv)
 
                 # TODO: Decrypt message from client
                 decryptedMessage = decrypt_message(ciphertext_message, plaintext_key, iv)
-                print (decrypt_message)
+                print (decryptedMessage)
 
                 # TODO: Split response from user into the username and password
-
+                #John section: verify user
+                decryptedMessage = decryptedMessage.decode("ASCII")
+                #print(decryptedMessage)
+                upass = decryptedMessage.split(' ', 2)
+                user = upass[0]
+                password = upass[1]
+                #print(user)
+                #print(password)
+                valid_user = verify_hash(user, password)
 
                 # TODO: Encrypt response to client
                 response_iv = os.urandom(16) # 128 bit IV init
-                print(response_iv)
-                ciphertext_response = encrypt_message("I received your message cutie!", plaintext_key, response_iv)
+                #print(response_iv)
+                plaintext_response = ""
+                if valid_user:
+                    plaintext_response = "User validated!"
+                else:
+                    plaintext_response = "Invalid user or password!"
+                ciphertext_response = encrypt_message(plaintext_response, plaintext_key, response_iv)
 
                 # Send encrypted response
                 send_message(connection, ciphertext_response)
