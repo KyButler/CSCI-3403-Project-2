@@ -34,9 +34,9 @@ def pad_message(message):
 def generate_key():
     # TODO: Implement this function
     key = os.urandom(16)
-    print("AES KEY:")
-    print(key)
-    print("LENGTH ", len(key))
+    #print("AES KEY:")
+    #print(key)
+    #print("LENGTH ", len(key))
     return key # 128 bit key = 16 bytes
 
 
@@ -117,7 +117,7 @@ def main():
 
         # TODO: Receive and decrypt response from server
         response = receive_message(sock)
-        print(response)
+        #print(response)
         reply_iv = receive_message(sock)
         #print(reply_iv)
         decipher = decrypt_message(response, key, reply_iv)

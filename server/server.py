@@ -42,7 +42,7 @@ def decrypt_key(session_key):
     priv_key = RSA.importKey(open('RSA_keys').read())
     cipher = PKCS1_OAEP.new(priv_key)
     decrypted_key = cipher.decrypt(session_key)
-    print("AES KEY: ", decrypted_key)
+    #print("AES KEY: ", decrypted_key)
     return decrypted_key
 
 
@@ -138,12 +138,12 @@ def main():
 
                 # TODO: Decrypt message from client
                 decryptedMessage = decrypt_message(ciphertext_message, plaintext_key, iv)
-                print (decryptedMessage)
+                #print (decryptedMessage)
 
                 # TODO: Split response from user into the username and password
                 #John section: verify user
                 decryptedMessage = decryptedMessage.decode("ASCII")
-                #print(decryptedMessage)
+                print(decryptedMessage)
                 upass = decryptedMessage.split(' ', 2)
                 user = upass[0]
                 password = upass[1]
@@ -156,9 +156,9 @@ def main():
                 #print(response_iv)
                 plaintext_response = ""
                 if valid_user:
-                    plaintext_response = "User validated!"
+                    plaintext_response = "User successfully authenticated!"
                 else:
-                    plaintext_response = "Invalid user or password!"
+                    plaintext_response = "Password or username incorrect."
                 ciphertext_response = encrypt_message(plaintext_response, plaintext_key, response_iv)
 
                 # Send encrypted response
